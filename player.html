@@ -191,20 +191,20 @@
 
         <!-- Converter Tab -->
         <div id="tab-content-1" class="hidden">
-            <div class="max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-3xl p-10 shadow-xl">
+            <div class="max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-3xl p-10 shadow-xl text-gray-900 dark:text-gray-100">
                 <h2 class="text-2xl font-semibold text-center mb-8">M3U8 到 MP4 转换器</h2>
                 
                 <div class="space-y-8">
                     <div>
-                        <label class="block text-sm font-medium mb-3">M3U8 视频流地址</label>
+                        <label class="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">M3U8 视频流地址</label>
                         <input id="convert-url" type="text" 
-                               class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl focus:outline-none focus:border-blue-500 font-mono"
+                               class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                                placeholder="https://example.com/playlist.m3u8" value="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium mb-3">转换质量</label>
+                            <label class="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">转换质量</label>
                             <select id="quality" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                                 <option value="high">最高画质</option>
                                 <option value="medium" selected>推荐 (中等)</option>
@@ -212,7 +212,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-3">录制时长</label>
+                            <label class="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">录制时长</label>
                             <select id="duration" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                                 <option value="60">60秒</option>
                                 <option value="180" selected>3分钟</option>
