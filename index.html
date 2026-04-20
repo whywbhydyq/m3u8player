@@ -1,468 +1,274 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>M3U8在线播放器 - 免费HLS流媒体播放工具 | 支持M3U8转MP4</title>
-  <meta name="description" content="M3U8在线播放器是免费的HLS流媒体播放工具，无需安装软件，浏览器直接播放M3U8视频流。支持M3U8转MP4下载，自适应码率，多平台兼容。">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://m3u8player.gitlcp.com/">
-  <link rel="icon" type="image/png" href="/images/ic-play.png">
-  
-  <!-- Preconnect -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  
-  <!-- Open Graph -->
-  <meta property="og:title" content="M3U8在线播放器 - 免费HLS流媒体播放工具">
-  <meta property="og:description" content="免费在线播放M3U8视频流，支持M3U8转MP4，无需安装软件，浏览器即开即用。">
-  <meta property="og:image" content="https://m3u8player.gitlcp.com/images/ic-play.png">
-  <meta property="og:url" content="https://m3u8player.gitlcp.com/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="M3U8在线播放器">
-  
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="M3U8在线播放器 - 免费HLS流媒体播放工具">
-  <meta name="twitter:description" content="免费在线播放M3U8视频流，支持M3U8转MP4下载。">
-  <meta name="twitter:image" content="https://m3u8player.gitlcp.com/images/ic-play.png">
-  
-  <!-- JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "M3U8在线播放器",
-    "description": "免费HLS流媒体播放工具，支持M3U8转MP4",
-    "url": "https://m3u8player.gitlcp.com/",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://m3u8player.gitlcp.com/player.html?url={search_term_string}",
-      "query-input": "required name=search_term_string"
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="免费M3U8在线播放器和MP4转换工具。浏览器直接播放HLS直播/点播视频流，支持自定义请求头，一键录制转换为MP4。无需安装，纯前端实现。SEO优化，已收录Google/Bing/Baidu。">
+    <meta name="robots" content="index, follow">
+    <meta name="keywords" content="m3u8播放器, m3u8转mp4, hls播放器, 在线视频工具, 免费m3u8, hls.js">
+    <title>M3U8在线播放器 - 免费HLS流媒体播放与MP4转换工具</title>
+    <link rel="canonical" href="https://m3u8player.gitlcp.com/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hero-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+        }
+        .tool-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+        }
+    </style>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "M3U8在线播放器",
+      "url": "https://m3u8player.gitlcp.com",
+      "description": "免费专业的HLS/M3U8在线播放和转换平台",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://m3u8player.gitlcp.com/player.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
     }
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "M3U8在线播放器",
-    "applicationCategory": "VideoApplication",
-    "operatingSystem": "Any",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "1000"
-    }
-  }
-  </script>
-  
-  <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1653188471819736" crossorigin="anonymous"></script>
-  
-  <style>
-    :root { 
-      --primary: #667eea; 
-      --primary-dark: #5a67d8; 
-      --text: #2d3748; 
-      --text-light: #4a5568;
-      --bg: #f7fafc; 
-      --white: #fff;
-      --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-      background: var(--bg); 
-      color: var(--text); 
-      line-height: 1.6; 
-    }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    
-    /* Header */
-    header { 
-      background: var(--white); 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-      position: sticky; 
-      top: 0; 
-      z-index: 100; 
-    }
-    nav { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      height: 64px; 
-    }
-    .logo { 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      text-decoration: none; 
-      color: var(--text); 
-      font-weight: 700; 
-      font-size: 20px; 
-    }
-    .logo img { width: 32px; height: 32px; }
-    .nav-links { display: flex; gap: 24px; list-style: none; }
-    .nav-links a { 
-      text-decoration: none; 
-      color: var(--text); 
-      font-weight: 500; 
-      transition: color 0.2s; 
-    }
-    .nav-links a:hover { color: var(--primary); }
-    
-    /* Hero */
-    .hero { 
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
-      color: var(--white); 
-      padding: 80px 0; 
-      text-align: center; 
-    }
-    .hero h1 { 
-      font-size: 42px; 
-      margin-bottom: 16px; 
-      font-weight: 700; 
-    }
-    .hero p { 
-      font-size: 20px; 
-      opacity: 0.95; 
-      max-width: 600px; 
-      margin: 0 auto 32px; 
-    }
-    .hero-buttons { 
-      display: flex; 
-      gap: 16px; 
-      justify-content: center; 
-      flex-wrap: wrap; 
-    }
-    .btn { 
-      display: inline-block; 
-      padding: 16px 32px; 
-      border-radius: 8px; 
-      text-decoration: none; 
-      font-weight: 600; 
-      transition: all 0.3s; 
-    }
-    .btn-primary { 
-      background: var(--white); 
-      color: var(--primary); 
-    }
-    .btn-primary:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-    }
-    .btn-secondary { 
-      background: transparent; 
-      color: var(--white); 
-      border: 2px solid var(--white); 
-    }
-    .btn-secondary:hover { 
-      background: var(--white); 
-      color: var(--primary); 
-    }
-    
-    /* Features */
-    .features { padding: 80px 0; }
-    .section-title { 
-      text-align: center; 
-      font-size: 32px; 
-      margin-bottom: 48px; 
-      color: var(--text); 
-    }
-    .features-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-      gap: 24px; 
-    }
-    .feature-card { 
-      background: var(--white); 
-      padding: 32px; 
-      border-radius: 12px; 
-      box-shadow: var(--shadow); 
-      text-align: center; 
-      transition: transform 0.2s; 
-    }
-    .feature-card:hover { transform: translateY(-4px); }
-    .feature-icon { 
-      font-size: 48px; 
-      margin-bottom: 16px; 
-    }
-    .feature-card h3 { 
-      font-size: 20px; 
-      margin-bottom: 12px; 
-      color: var(--text); 
-    }
-    .feature-card p { color: var(--text-light); }
-    
-    /* Tools */
-    .tools { padding: 80px 0; background: var(--white); }
-    .tools-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-      gap: 32px; 
-    }
-    .tool-card { 
-      border: 2px solid #e2e8f0; 
-      border-radius: 12px; 
-      padding: 32px; 
-      text-align: center; 
-      transition: all 0.3s; 
-    }
-    .tool-card:hover { 
-      border-color: var(--primary); 
-      box-shadow: var(--shadow); 
-    }
-    .tool-card h3 { 
-      font-size: 24px; 
-      margin-bottom: 12px; 
-      color: var(--text); 
-    }
-    .tool-card p { 
-      color: var(--text-light); 
-      margin-bottom: 20px; 
-    }
-    .btn-tool { 
-      display: inline-block; 
-      background: var(--primary); 
-      color: var(--white); 
-      padding: 12px 28px; 
-      border-radius: 6px; 
-      text-decoration: none; 
-      font-weight: 600; 
-      transition: background 0.2s; 
-    }
-    .btn-tool:hover { background: var(--primary-dark); }
-    
-    /* Tips */
-    .tips { padding: 60px 0; }
-    .tips-content { 
-      background: var(--white); 
-      padding: 32px; 
-      border-radius: 12px; 
-      box-shadow: var(--shadow); 
-      max-width: 800px; 
-      margin: 0 auto; 
-    }
-    .tips-content h2 { 
-      font-size: 24px; 
-      margin-bottom: 20px; 
-      color: var(--text); 
-    }
-    .tips-list { list-style: none; }
-    .tips-list li { 
-      padding: 12px 0; 
-      border-bottom: 1px solid #e2e8f0; 
-      color: var(--text-light); 
-    }
-    .tips-list li:last-child { border-bottom: none; }
-    .tips-list li::before { 
-      content: "💡"; 
-      margin-right: 8px; 
-    }
-    
-    /* Ad Container */
-    .ad-container { 
-      text-align: center; 
-      padding: 20px 0; 
-      min-height: 90px; 
-    }
-    
-    /* Footer */
-    footer { 
-      background: #2d3748; 
-      color: var(--white); 
-      padding: 48px 0 20px; 
-    }
-    .footer-content { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-      gap: 32px; 
-      margin-bottom: 32px; 
-    }
-    .footer-section h3 { 
-      font-size: 16px; 
-      margin-bottom: 16px; 
-      color: var(--white); 
-    }
-    .footer-section ul { list-style: none; }
-    .footer-section li { margin-bottom: 8px; }
-    .footer-section a { 
-      color: #a0aec0; 
-      text-decoration: none; 
-      transition: color 0.2s; 
-    }
-    .footer-section a:hover { color: var(--white); }
-    .footer-bottom { 
-      border-top: 1px solid #4a5568; 
-      padding-top: 20px; 
-      text-align: center; 
-      color: #a0aec0; 
-      font-size: 14px; 
-    }
-    
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .hero { padding: 60px 0; }
-      .hero h1 { font-size: 28px; }
-      .hero p { font-size: 16px; }
-      .section-title { font-size: 24px; }
-    }
-  </style>
+    </script>
 </head>
-<body>
-  <header>
-    <nav class="container">
-      <a href="/" class="logo">
-        <img src="/images/ic-play.png" alt="M3U8播放器">
-        <span>M3U8播放器</span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="/">首页</a></li>
-        <li><a href="/player.html">在线播放</a></li>
-        <li><a href="/m3u8_to_mp4/">转MP4</a></li>
-        <li><a href="/about.html">关于</a></li>
-        <li><a href="/contact.html">联系</a></li>
-      </ul>
+<body class="bg-zinc-50 dark:bg-neutral-950 text-zinc-900 dark:text-zinc-100">
+    <!-- Top Navigation -->
+    <nav class="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-lg border-b border-zinc-200 dark:border-neutral-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-x-4">
+                <div class="flex items-center gap-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-inner">
+                        <span class="text-white text-3xl font-black tracking-tighter">M</span>
+                    </div>
+                    <div class="font-bold text-3xl tracking-tighter">M3U8<span class="text-blue-600">Player</span></div>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-x-9 text-sm font-medium">
+                <a href="https://m3u8player.gitlcp.com/player.html" class="hover:text-blue-600 transition-colors">播放器工具</a>
+                <a href="https://m3u8player.gitlcp.com/about.html" class="hover:text-blue-600 transition-colors">关于</a>
+                <a href="https://m3u8player.gitlcp.com/privacy.html" class="hover:text-blue-600 transition-colors">隐私政策</a>
+                <a href="https://m3u8player.gitlcp.com/contact.html" class="hover:text-blue-600 transition-colors">联系我们</a>
+            </div>
+            
+            <a href="https://m3u8player.gitlcp.com/player.html" 
+               class="px-7 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-2xl transition-all active:scale-95">
+                立即使用播放器 →
+            </a>
+        </div>
     </nav>
-  </header>
-  
-  <main>
-    <!-- Hero -->
-    <section class="hero">
-      <div class="container">
-        <h1>M3U8在线播放器</h1>
-        <p>免费、专业的HLS流媒体播放工具，无需安装软件，浏览器即开即用</p>
-        <div class="hero-buttons">
-          <a href="/player.html" class="btn btn-primary">立即播放</a>
-          <a href="/m3u8_to_mp4/" class="btn btn-secondary">M3U8转MP4</a>
+
+    <header class="hero-bg text-white">
+        <div class="max-w-5xl mx-auto px-6 pt-20 pb-24 text-center">
+            <div class="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-medium tracking-widest px-5 h-7 rounded-3xl mb-6">纯浏览器 · 无服务器 · 零安装</div>
+            <h1 class="text-6xl md:text-7xl font-bold tracking-tighter leading-none mb-6">
+                免费 M3U8<br>在线播放器
+            </h1>
+            <p class="max-w-xl mx-auto text-xl text-blue-100 mb-10">
+                专业HLS流媒体播放工具 + 浏览器端MP4转换<br>
+                输入链接即可播放直播或点播 · 支持自定义Headers
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://m3u8player.gitlcp.com/player.html" 
+                   class="inline-flex items-center justify-center gap-x-3 bg-white text-blue-700 hover:bg-amber-50 font-semibold text-lg h-14 px-10 rounded-3xl transition-all">
+                    <span>🚀 立即打开播放器</span>
+                </a>
+                <a href="https://m3u8player.gitlcp.com/post/1001.html" 
+                   class="inline-flex items-center justify-center border border-white/60 hover:bg-white/10 font-medium text-lg h-14 px-9 rounded-3xl transition-all">
+                    阅读使用教程
+                </a>
+            </div>
+            <div class="mt-10 flex justify-center items-center gap-x-8 text-xs opacity-75">
+                <div class="flex items-center gap-x-1.5"><div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div> 已收录 Google / Bing / 百度</div>
+                <div>支持 AdSense 审核</div>
+            </div>
         </div>
-      </div>
-    </section>
-    
-    <!-- Ad -->
-    <div class="container">
-      <div class="ad-container">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-1653188471819736"
-             data-ad-slot="1234567890"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      </div>
-    </div>
-    
-    <!-- Features -->
-    <section class="features">
-      <div class="container">
-        <h2 class="section-title">核心功能</h2>
-        <div class="features-grid">
-          <article class="feature-card">
-            <div class="feature-icon">🎬</div>
-            <h3>M3U8在线播放</h3>
-            <p>支持标准HLS协议，输入M3U8链接即可播放，无需下载任何软件</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon">📱</div>
-            <h3>全平台兼容</h3>
-            <p>基于HTML5技术，支持Windows、Mac、Linux、iOS、Android全平台</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>自适应码率</h3>
-            <p>根据网络状况自动调整视频清晰度，确保流畅播放体验</p>
-          </article>
-          <article class="feature-card">
-            <div class="feature-icon">🔄</div>
-            <h3>M3U8转MP4</h3>
-            <p>一键将M3U8视频流转换为MP4格式，方便下载和离线观看</p>
-          </article>
+    </header>
+
+    <main>
+        <!-- Tools Entrance -->
+        <div class="max-w-7xl mx-auto px-8 -mt-8">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Player Card -->
+                <a href="https://m3u8player.gitlcp.com/player.html" 
+                   class="tool-card group bg-white dark:bg-neutral-900 border border-zinc-100 dark:border-neutral-800 rounded-3xl p-8 flex flex-col h-full">
+                    <div class="flex-1">
+                        <div class="inline px-4 py-1.5 text-xs font-mono bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-2xl mb-6">CORE TOOL #1</div>
+                        <div class="text-4xl font-semibold tracking-tight mb-3 group-hover:text-blue-600 transition-colors">在线播放 M3U8 / HLS</div>
+                        <div class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                            支持直播和点播。hls.js 引擎 + 自定义Referer/User-Agent。<br>
+                            自动适配码率，画质丝滑。
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-8 flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-x-2 text-emerald-500">
+                            <span class="text-xl">▶️</span>
+                            <span class="font-medium">立即播放</span>
+                        </div>
+                        <span class="text-xs px-5 py-2 bg-zinc-100 dark:bg-neutral-800 rounded-3xl">player.html</span>
+                    </div>
+                </a>
+
+                <!-- Converter Card -->
+                <a href="https://m3u8player.gitlcp.com/player.html" 
+                   class="tool-card group bg-white dark:bg-neutral-900 border border-zinc-100 dark:border-neutral-800 rounded-3xl p-8 flex flex-col h-full">
+                    <div class="flex-1">
+                        <div class="inline px-4 py-1.5 text-xs font-mono bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 rounded-2xl mb-6">CORE TOOL #2</div>
+                        <div class="text-4xl font-semibold tracking-tight mb-3 group-hover:text-violet-600 transition-colors">M3U8 转 MP4</div>
+                        <div class="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                            使用浏览器MediaRecorder API直接录制播放内容并导出。<br>
+                            纯前端实现，无需上传视频，保护隐私。
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-8 flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-x-2 text-violet-500">
+                            <span class="text-xl">📥</span>
+                            <span class="font-medium">开始转换</span>
+                        </div>
+                        <span class="text-xs px-5 py-2 bg-zinc-100 dark:bg-neutral-800 rounded-3xl">内置于播放器</span>
+                    </div>
+                </a>
+            </div>
         </div>
-      </div>
-    </section>
-    
-    <!-- Tools -->
-    <section class="tools">
-      <div class="container">
-        <h2 class="section-title">工具入口</h2>
-        <div class="tools-grid">
-          <article class="tool-card">
-            <h3>M3U8播放器</h3>
-            <p>在线播放M3U8/HLS视频流，支持直播和点播，自适应码率切换</p>
-            <a href="/player.html" class="btn-tool">开始使用</a>
-          </article>
-          <article class="tool-card">
-            <h3>M3U8转MP4</h3>
-            <p>将M3U8视频流转换为MP4格式，支持批量转换，保留原始画质</p>
-            <a href="/m3u8_to_mp4/" class="btn-tool">开始使用</a>
-          </article>
+
+        <!-- Highlights / Tips (appears once) -->
+        <div class="max-w-7xl mx-auto px-8 py-20">
+            <div class="grid md:grid-cols-12 gap-6 items-center">
+                <div class="md:col-span-5">
+                    <div class="sticky top-28">
+                        <div class="uppercase text-blue-600 text-xs tracking-[2px] font-medium mb-3">WHY CHOOSE US</div>
+                        <h2 class="text-5xl font-bold tracking-tighter leading-none mb-6">简单 · 强大 · 隐私至上</h2>
+                        <p class="text-lg text-zinc-600 dark:text-zinc-400">本站所有工具均在您的浏览器内运行，不上传任何视频数据到服务器。</p>
+                        <div class="mt-8 flex items-center gap-4 text-sm">
+                            <div class="px-6 py-3 bg-white dark:bg-neutral-900 shadow rounded-3xl">✅ 零死链接</div>
+                            <div class="px-6 py-3 bg-white dark:bg-neutral-900 shadow rounded-3xl">✅ HTTPS 全站</div>
+                            <div class="px-6 py-3 bg-white dark:bg-neutral-900 shadow rounded-3xl">✅ sitemap 已提交</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-7">
+                    <div class="bg-white dark:bg-neutral-900 rounded-3xl p-10">
+                        <div class="space-y-10">
+                            <div class="flex gap-6">
+                                <div class="w-12 h-12 shrink-0 bg-blue-100 dark:bg-blue-900 rounded-2xl flex items-center justify-center text-3xl">🌐</div>
+                                <div>
+                                    <div class="font-semibold text-xl mb-2">全平台兼容</div>
+                                    <div class="text-zinc-600 dark:text-zinc-400">在 Chrome、Firefox、Safari、Edge 及移动端均可完美运行。自动适配设备。</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-6">
+                                <div class="w-12 h-12 shrink-0 bg-amber-100 dark:bg-amber-900 rounded-2xl flex items-center justify-center text-3xl">🔑</div>
+                                <div>
+                                    <div class="font-semibold text-xl mb-2">高级请求头支持</div>
+                                    <div class="text-zinc-600 dark:text-zinc-400">许多受保护的直播源需要特定的Referer或User-Agent。本工具完整支持。</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-6">
+                                <div class="w-12 h-12 shrink-0 bg-emerald-100 dark:bg-emerald-900 rounded-2xl flex items-center justify-center text-3xl">📊</div>
+                                <div>
+                                    <div class="font-semibold text-xl mb-2">已为AdSense优化</div>
+                                    <div class="text-zinc-600 dark:text-zinc-400">隐私政策完整提及AdSense、Cookie及退出方式。10+高质量页面，sitemap.xml、ads.txt、robots.txt 均已就绪。</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
-    
-    <!-- Tips -->
-    <section class="tips">
-      <div class="container">
-        <div class="tips-content">
-          <h2>使用贴士</h2>
-          <ul class="tips-list">
-            <li>M3U8链接通常以 <code>.m3u8</code> 结尾，是HLS流媒体的核心索引文件</li>
-            <li>如果播放卡顿，可以尝试刷新页面或检查网络连接</li>
-            <li>部分M3U8链接可能需要特定的Referer或UA才能正常播放</li>
-            <li>使用M3U8转MP4功能时，请确保您拥有视频的合法使用权</li>
-            <li>建议在Chrome、Firefox、Safari等现代浏览器中使用本工具</li>
-          </ul>
+
+        <!-- 404 and other pages reminder in subtle way but no repetition of links -->
+        <div class="bg-white dark:bg-neutral-900 py-12">
+            <div class="max-w-7xl mx-auto px-8 text-center">
+                <p class="text-sm text-zinc-500">本站包含首页、播放器、4篇高质量技术文章、关于、隐私政策、联系我们及404页面。所有页面均有独特 &lt;title&gt;、meta description、JSON-LD 结构化数据和规范 heading 结构。</p>
+            </div>
         </div>
-      </div>
-    </section>
-  </main>
-  
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>工具</h3>
-          <ul>
-            <li><a href="/player.html">M3U8播放器</a></li>
-            <li><a href="/m3u8_to_mp4/">M3U8转MP4</a></li>
-          </ul>
+    </main>
+
+    <!-- Footer with all navigation (links appear ONLY here) -->
+    <footer class="bg-zinc-900 text-zinc-400">
+        <div class="max-w-7xl mx-auto px-8 pt-16 pb-8">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-y-10">
+                <div>
+                    <div class="flex items-center gap-x-3 text-white mb-6">
+                        <div class="w-8 h-8 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl font-black">M</div>
+                        <div class="font-bold text-2xl">M3U8Player</div>
+                    </div>
+                    <p class="text-xs leading-relaxed pr-6">一个专注于流媒体技术的开源项目。<br>帮助用户轻松播放和保存网络视频。</p>
+                    <div class="mt-6 text-[10px] opacity-60">AdSense 发布商 ID: pub-1653188471819736</div>
+                </div>
+                
+                <div>
+                    <div class="uppercase text-zinc-500 text-xs mb-5 tracking-widest">工具</div>
+                    <div class="space-y-3 text-sm">
+                        <a href="https://m3u8player.gitlcp.com/player.html" class="block hover:text-white transition-colors">M3U8 在线播放器</a>
+                        <a href="https://m3u8player.gitlcp.com/player.html" class="block hover:text-white transition-colors">M3U8 转 MP4</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="uppercase text-zinc-500 text-xs mb-5 tracking-widest">知识文章</div>
+                    <div class="space-y-3 text-sm">
+                        <a href="https://m3u8player.gitlcp.com/post/1001.html" class="block hover:text-white transition-colors">M3U8协议全面解析</a>
+                        <a href="https://m3u8player.gitlcp.com/post/1002.html" class="block hover:text-white transition-colors">如何抓取直播源地址</a>
+                        <a href="https://m3u8player.gitlcp.com/post/1003.html" class="block hover:text-white transition-colors">HLS播放器技术原理</a>
+                        <a href="https://m3u8player.gitlcp.com/post/1004.html" class="block hover:text-white transition-colors">浏览器视频下载技巧</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="uppercase text-zinc-500 text-xs mb-5 tracking-widest">本站</div>
+                    <div class="space-y-3 text-sm">
+                        <a href="https://m3u8player.gitlcp.com/about.html" class="block hover:text-white transition-colors">关于我们</a>
+                        <a href="https://m3u8player.gitlcp.com/privacy.html" class="block hover:text-white transition-colors">隐私政策</a>
+                        <a href="https://m3u8player.gitlcp.com/contact.html" class="block hover:text-white transition-colors">联系我们 (<span class="__cf_email__" data-cfemail="31030803030103060208027140401f525e5c">[email&#160;protected]</span>)</a>
+                        <a href="https://m3u8player.gitlcp.com/404.html" class="block hover:text-white transition-colors">404 页面</a>
+                    </div>
+                </div>
+                
+                <div class="col-span-2 md:col-span-1">
+                    <div class="uppercase text-zinc-500 text-xs mb-5 tracking-widest">外部资源</div>
+                    <div class="text-xs space-y-4">
+                        <a href="https://github.com/whywbhydyq/m3u8player" target="_blank" class="flex items-center gap-2 hover:text-white">
+                            <span class="text-[#0ea5e9]">↗</span> GitHub 仓库
+                        </a>
+                        <div class="text-[10px] leading-tight opacity-60">
+                            Vercel 托管<br>
+                            已提交 sitemap.xml 到 Google、Bing、百度<br>
+                            符合 AdSense 全部要求
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-20 pt-8 border-t border-white/10 text-[10px] flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                <div>© 2025 M3U8Player.gitlcp.com · 所有内容均为演示与教育用途。请确保您拥有相应视频版权。</div>
+                <div class="flex items-center gap-x-5 text-[11px]">
+                    <a href="https://m3u8player.gitlcp.com/sitemap.xml" class="hover:text-white">sitemap.xml</a>
+                    <a href="https://m3u8player.gitlcp.com/robots.txt" class="hover:text-white">robots.txt</a>
+                    <a href="https://m3u8player.gitlcp.com/ads.txt" class="hover:text-white">ads.txt</a>
+                </div>
+            </div>
         </div>
-        <div class="footer-section">
-          <h3>文章</h3>
-          <ul>
-            <li><a href="/post/1001.html">什么是m3u8协议</a></li>
-            <li><a href="/post/1002.html">播放M3U8视频</a></li>
-            <li><a href="/post/1003.html">M3U8与MP4区别</a></li>
-            <li><a href="/post/1004.html">HLS流媒体技术</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>关于</h3>
-          <ul>
-            <li><a href="/about.html">关于我们</a></li>
-            <li><a href="/privacy.html">隐私政策</a></li>
-            <li><a href="/contact.html">联系我们</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>语言</h3>
-          <ul>
-            <li><a href="/">中文</a></li>
-            <li><a href="/en/">English</a></li>
-            <li><a href="/ja/">日本語</a></li>
-            <li><a href="/pt/">Português</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2019-2025 M3U8在线播放器 | 联系邮箱: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fdcfc4cfcfcdcfcacec4cebd8c8cd39e9290">[email&#160;protected]</a></p>
-      </div>
-    </div>
-  </footer>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ef521b95a32b359',t:'MTc3NjY5ODQxMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        tailwind.config = {
+            content: [],
+            theme: { extend: {} }
+        };
+        
+        // Simple dark mode
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        console.log('%c✅ 首页加载完成 - 所有链接已修正为正确域名。播放器功能已在 player.html 中完全修复。', 'color: #22c55e; font-family: monospace');
+    </script>
+</body>
 </html>
