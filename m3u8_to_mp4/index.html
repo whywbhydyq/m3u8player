@@ -126,6 +126,19 @@
       border-radius: 8px; 
       font-size: 16px; 
       transition: border-color 0.2s; 
+      background: #fff; 
+      color: #2d3748; 
+    }
+    @media (prefers-color-scheme: dark) {
+      .input-group input { background: #1a202c; color: #e2e8f0; border-color: #4a5568; }
+      .option input, .option select { background: #1a202c; color: #e2e8f0; border-color: #4a5568; }
+      .converter { background: #1a202c; }
+      .feature { background: #1a202c; }
+      .steps { background: #1a202c; }
+      body { background: #0d1117; color: #e2e8f0; }
+      .status.info { background: #1a365d; color: #90cdf4; }
+      .status.error { background: #742a2a; color: #feb2b2; }
+      .status.success { background: #22543d; color: #9ae6b4; }
     }
     .input-group input:focus { 
       outline: none; 

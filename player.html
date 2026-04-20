@@ -106,7 +106,7 @@
                         <div class="flex gap-3 mb-4">
                             <input id="m3u8-url" type="text" 
                                    class="flex-1 px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:border-blue-500 font-mono text-sm"
-                                   placeholder="输入M3U8链接 (例如: https://example.com/playlist.m3u8)" value="https://test-streams.mux.dev/x264_720p_1500kbs_30fps/index.m3u8">
+                                   placeholder="输入M3U8链接 (例如: https://example.com/playlist.m3u8)" value="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4 mb-6">
@@ -199,13 +199,13 @@
                         <label class="block text-sm font-medium mb-3">M3U8 视频流地址</label>
                         <input id="convert-url" type="text" 
                                class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl focus:outline-none focus:border-blue-500 font-mono"
-                               placeholder="https://example.com/playlist.m3u8" value="https://test-streams.mux.dev/x264_720p_1500kbs_30fps/index.m3u8">
+                               placeholder="https://example.com/playlist.m3u8" value="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium mb-3">转换质量</label>
-                            <select id="quality" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl">
+                            <select id="quality" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                                 <option value="high">最高画质</option>
                                 <option value="medium" selected>推荐 (中等)</option>
                                 <option value="low">低画质 (更快)</option>
@@ -213,7 +213,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-3">录制时长</label>
-                            <select id="duration" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl">
+                            <select id="duration" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                                 <option value="60">60秒</option>
                                 <option value="180" selected>3分钟</option>
                                 <option value="300">5分钟</option>
@@ -245,7 +245,7 @@
                 </div>
             </div>
             
-            <div class="text-center mt-10 text-xs text-gray-500 max-w-md mx-auto">
+            <div class="text-center mt-10 text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
                 注意：MP4转换使用浏览器内置MediaRecorder API录制播放的视频内容。<br>
                 这是一种纯前端、无服务器的实现。适合点播视频完整录制或直播片段捕捉。
             </div>
@@ -307,6 +307,7 @@
         let recordedBlob = null;
         let currentTab = 0;
         let darkMode = false;
+        let isLoading = false;
 
         function log(message, type = 'info') {
             const logEl = document.getElementById('log');
@@ -367,6 +368,8 @@
                 hls = null;
             }
             
+            if (isLoading) { log('正在加载中，请等待...'); return; }
+            isLoading = true;
             log('正在加载: ' + urlInput.substring(0, 60) + '...');
             
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
@@ -390,12 +393,14 @@
                 });
                 
                 hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                    isLoading = false;
                     log('M3U8清单解析成功，找到 ' + data.levels.length + ' 个清晰度', 'success');
                     video.play().catch(e => log('自动播放失败: ' + e.message, 'error'));
                 });
                 
                 hls.on(Hls.Events.ERROR, function (event, data) {
                     if (data.fatal) {
+                        isLoading = false;
                         log('致命错误: ' + data.type + ' - ' + data.details, 'error');
                         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                             hls.startLoad();
@@ -408,6 +413,7 @@
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 // For Safari native HLS
                 video.src = urlInput;
+                isLoading = false;
                 log('使用Safari原生HLS支持', 'success');
                 video.play();
             } else {
@@ -493,7 +499,7 @@
 
         function useExample(n) {
             const urls = [
-                "https://test-streams.mux.dev/x264_720p_1500kbs_30fps/index.m3u8",
+                "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
                 "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
                 "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
             ];
