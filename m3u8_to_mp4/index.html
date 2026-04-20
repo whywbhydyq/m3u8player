@@ -11,6 +11,7 @@
   
   <!-- Preconnect -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7"></script>
   
   <!-- Open Graph -->
   <meta property="og:title" content="M3U8转MP4 - 免费在线视频格式转换工具">
@@ -380,7 +381,8 @@
           </div>
         </div>
         
-        <div class="progress-container" id="progressContainer">
+        <video id="hiddenVideo" style="display:none" muted playsinline></video>
+      <div class="progress-container" id="progressContainer">
           <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
           </div>
@@ -481,61 +483,135 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2019-2025 M3U8在线播放器 | 联系邮箱: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="aa989398989a989d999399eadbdb84c9c5c7">[email&#160;protected]</a></p>
+        <p>&copy; 2019-2025 M3U8在线播放器 | 联系邮箱: <a href="mailto:2922027393@qq.com">2922027393@qq.com</a></p>
       </div>
     </div>
   </footer>
   
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
+    var convHls = null;
+    var convRecorder = null;
+    var convChunks = [];
+    var convInterval = null;
+
     function showStatus(message, type) {
-      const status = document.getElementById('status');
+      var status = document.getElementById('status');
       status.textContent = message;
       status.className = 'status ' + type;
     }
-    
+
     function updateProgress(percent, text) {
-      const container = document.getElementById('progressContainer');
-      const fill = document.getElementById('progressFill');
-      const textEl = document.getElementById('progressText');
-      
+      var container = document.getElementById('progressContainer');
+      var fill = document.getElementById('progressFill');
+      var textEl = document.getElementById('progressText');
       container.classList.add('active');
       fill.style.width = percent + '%';
       textEl.textContent = text;
     }
-    
-    async function startConversion() {
-      const url = document.getElementById('urlInput').value.trim();
-      const btn = document.getElementById('convertBtn');
-      
-      if (!url) {
-        showStatus('请输入M3U8视频链接', 'error');
-        return;
-      }
-      
+
+    function startConversion() {
+      var url = document.getElementById('urlInput').value.trim();
+      var btn = document.getElementById('convertBtn');
+      if (!url) { showStatus('请输入M3U8视频链接', 'error'); return; }
+
       btn.disabled = true;
-      showStatus('正在初始化转换...', 'info');
-      updateProgress(10, '正在解析M3U8文件...');
-      
-      // Note: Due to CORS restrictions, client-side M3U8 to MP4 conversion
-      // requires a server-side proxy or service worker. This is a simplified UI.
-      // In production, you would need:
-      // 1. A server-side API to fetch and convert the video
-      // 2. Or instruct users to use ffmpeg locally
-      
-      setTimeout(() => {
-        updateProgress(50, '正在下载视频片段...');
-      }, 1000);
-      
-      setTimeout(() => {
-        updateProgress(90, '正在合并为MP4...');
-      }, 2000);
-      
-      setTimeout(() => {
-        updateProgress(100, '转换完成！');
-        showStatus('转换功能需要服务端支持。请使用ffmpeg命令行工具进行转换：ffmpeg -i "' + url + '" -c copy output.mp4', 'info');
+      showStatus('正在初始化...', 'info');
+      updateProgress(5, '正在加载视频流...');
+
+      if (convInterval) { clearInterval(convInterval); convInterval = null; }
+      if (convRecorder && convRecorder.state !== 'inactive') { convRecorder.stop(); }
+      if (convHls) { convHls.destroy(); convHls = null; }
+      convChunks = [];
+
+      var video = document.getElementById('hiddenVideo');
+      var started = false;
+
+      function beginRec() {
+        if (started) return;
+        started = true;
+        try {
+          var mime = 'video/webm;codecs=vp9';
+          if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
+          if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
+          if (!MediaRecorder.isTypeSupported(mime)) mime = '';
+          var stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+          if (!stream) { showStatus('浏览器不支持流捕获', 'error'); btn.disabled = false; return; }
+          convRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+          convRecorder.ondataavailable = function(e) { if (e.data.size > 0) convChunks.push(e.data); };
+          convRecorder.onstop = function() {
+            if (convInterval) { clearInterval(convInterval); convInterval = null; }
+            var blob = new Blob(convChunks, { type: 'video/webm' });
+            updateProgress(100, '转换完成！');
+            showStatus('转换完成！文件大小: ' + (blob.size / (1024*1024)).toFixed(2) + ' MB', 'success');
+            var fname = document.getElementById('filename').value.trim() || ('converted-' + Date.now() + '.webm');
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fname;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            btn.disabled = false;
+          };
+          convRecorder.start(1000);
+          updateProgress(15, '正在录制视频...');
+          showStatus('正在录制，请等待后点击“停止并下载”', 'info');
+          btn.textContent = '停止并下载';
+          btn.disabled = false;
+          btn.onclick = function() { stopConversion(); };
+          var startTime = Date.now();
+          convInterval = setInterval(function() {
+            var elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+            var pct = Math.min(15 + (elapsed / 300) * 80, 95);
+            updateProgress(pct, '录制中... ' + elapsed + '秒');
+          }, 500);
+        } catch(e) {
+          showStatus('录制失败: ' + e.message, 'error');
+          btn.disabled = false;
+        }
+      }
+
+      if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+        convHls = new Hls();
+        convHls.loadSource(url);
+        convHls.attachMedia(video);
+        convHls.on(Hls.Events.MANIFEST_PARSED, function() {
+          updateProgress(10, '流已加载，准备录制...');
+          video.play().then(function() { setTimeout(beginRec, 1500); }).catch(function(e) {
+            showStatus('播放失败: ' + e.message, 'error');
+            btn.disabled = false;
+          });
+        });
+        convHls.on(Hls.Events.ERROR, function(event, data) {
+          if (data.fatal) {
+            showStatus('加载失败: ' + data.details, 'error');
+            btn.disabled = false;
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.addEventListener('loadedmetadata', function() {
+          updateProgress(10, '流已加载...');
+          video.play().then(function() { setTimeout(beginRec, 1500); });
+        }, { once: true });
+      } else {
+        showStatus('浏览器不支持HLS播放', 'error');
         btn.disabled = false;
-      }, 3000);
+      }
     }
+
+    function stopConversion() {
+      if (convRecorder && convRecorder.state !== 'inactive') { convRecorder.stop(); }
+      if (convInterval) { clearInterval(convInterval); convInterval = null; }
+      var btn = document.getElementById('convertBtn');
+      btn.textContent = '开始转换';
+      btn.onclick = function() { startConversion(); };
+      showStatus('正在生成文件...', 'info');
+    }
+
+    document.getElementById('urlInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') startConversion();
+    });
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ef51cad0a7caf25',t:'MTc3NjY5ODIwNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

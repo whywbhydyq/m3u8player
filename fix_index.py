@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+﻿import os
+
+os.makedirs('D:\\桌面\\m3u8player', exist_ok=True)
+
+with open('D:\\桌面\\m3u8player\\index.html', 'w', encoding='utf-8') as f:
+    f.write('''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
@@ -267,4 +272,6 @@
         }
     </script>
 </body>
-</html>
+</html>''')
+
+print("✓ index.html 已写入 D:\\桌面\\m3u8player\\index.html")

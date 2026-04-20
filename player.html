@@ -267,7 +267,7 @@
                     <div class="font-medium mb-4 text-gray-900 dark:text-white">产品</div>
                     <div class="space-y-2.5 text-gray-500 dark:text-gray-400 text-xs">
                         <a href="https://m3u8player.gitlcp.com/player.html" class="block hover:text-blue-600">在线播放器</a>
-                        <a href="https://m3u8player.gitlcp.com/player.html#tab1" class="block hover:text-blue-600">MP4转换</a>
+                        <a href="https://m3u8player.gitlcp.com/m3u8_to_mp4/index.html" class="block hover:text-blue-600">M3U8转MP4</a>
                     </div>
                 </div>
                 <div>
@@ -369,7 +369,7 @@
             
             log('正在加载: ' + urlInput.substring(0, 60) + '...');
             
-            if (Hls.isSupported()) {
+            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 hls = new Hls({
                     debug: false,
                     xhrSetup: function(xhr, url) {
@@ -447,9 +447,11 @@
                 }
                 
                 recordedChunks = [];
-                mediaRecorder = new MediaRecorder(video.captureStream(), {
-                    mimeType: 'video/webm;codecs=vp9'  // webm is widely supported, we can convert name to mp4 or use webm
-                });
+                let mimeType = 'video/webm;codecs=vp9';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
+                mediaRecorder = new MediaRecorder(video.captureStream(), mimeType ? { mimeType: mimeType } : {});
                 
                 mediaRecorder.ondataavailable = function(event) {
                     if (event.data.size > 0) {
@@ -493,9 +495,9 @@
             const urls = [
                 "https://test-streams.mux.dev/x264_720p_1500kbs_30fps/index.m3u8",
                 "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
-                "https://videos-3.earthcam.com/fecnetwork/13306.flv/playlist.m3u8"
+                "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
             ];
-            const referers = ["", "", "https://www.earthcam.com"];
+            const referers = ["", "", ""];
             
             document.getElementById('m3u8-url').value = urls[n];
             document.getElementById('referer').value = referers[n];
@@ -505,88 +507,131 @@
             }, 300);
         }
 
-        // Converter functions (uses the same player logic internally)
+        // Converter functions
         let convertedBlob = null;
-        
+        let conversionRecorder = null;
+        let conversionChunks = [];
+        let conversionInterval = null;
+
         function startConversion() {
             const url = document.getElementById('convert-url').value.trim();
-            if (!url) {
-                alert('请输入M3U8地址');
-                return;
-            }
-            
+            if (!url) { alert('请输入M3U8地址'); return; }
+
             const progressContainer = document.getElementById('conversion-progress');
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const resultContainer = document.getElementById('conversion-result');
-            
+            const duration = parseInt(document.getElementById('duration').value) * 1000;
+
             progressContainer.classList.remove('hidden');
             resultContainer.classList.add('hidden');
-            progressBar.style.width = '10%';
-            progressText.textContent = '正在初始化播放器并加载流...';
-            
-            // Switch to player tab internally and load
+            progressBar.style.width = '5%';
+            progressText.textContent = '正在加载视频流...';
+
+            if (conversionInterval) { clearInterval(conversionInterval); conversionInterval = null; }
+            if (conversionRecorder && conversionRecorder.state !== 'inactive') { conversionRecorder.stop(); }
+            conversionChunks = [];
+
             switchTab(0);
             document.getElementById('m3u8-url').value = url;
-            setTimeout(() => {
-                loadAndPlay();
-                
-                // Simulate progress and start recording automatically after load
-                let progress = 10;
-                const interval = setInterval(() => {
-                    progress += Math.random() * 18 + 5;
-                    if (progress > 85) progress = 85;
-                    progressBar.style.width = progress + '%';
-                    
-                    if (progress > 45) {
-                        progressText.textContent = '流已加载，正在录制为MP4...';
-                    }
-                }, 420);
-                
-                setTimeout(() => {
-                    clearInterval(interval);
-                    progressBar.style.width = '92%';
-                    progressText.textContent = '录制完成，生成MP4文件...';
-                    
-                    // Trigger recording for demo
-                    setTimeout(() => {
-                        toggleRecording(); // start
-                        
-                        // Auto stop after 8 seconds for demo purposes
-                        setTimeout(() => {
-                            if (isRecording) toggleRecording(); // stop
-                            progressBar.style.width = '100%';
-                            progressText.textContent = '转换成功！';
-                            
-                            setTimeout(() => {
-                                progressContainer.classList.add('hidden');
-                                resultContainer.classList.remove('hidden');
-                                convertedBlob = recordedBlob;
-                                log('MP4转换流程完成 (录制时长取决于您的操作)', 'success');
-                            }, 800);
-                        }, 8000);
-                    }, 1500);
-                }, 2800);
-            }, 100);
-        }
-        
-        function downloadConvertedFile() {
-            if (!convertedBlob && recordedBlob) convertedBlob = recordedBlob;
-            if (!convertedBlob) {
-                alert('没有可下载的文件。请先完成一次转换。');
-                return;
+            if (hls) { hls.destroy(); hls = null; }
+
+            const video = document.getElementById('video');
+            let started = false;
+
+            function beginRec() {
+                if (started) return;
+                started = true;
+                try {
+                    let mime = 'video/webm;codecs=vp9';
+                    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
+                    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
+                    if (!MediaRecorder.isTypeSupported(mime)) mime = '';
+                    const stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+                    if (!stream) { progressText.textContent = '浏览器不支持流捕获'; return; }
+                    conversionRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+                    conversionRecorder.ondataavailable = function(e) { if (e.data.size > 0) conversionChunks.push(e.data); };
+                    conversionRecorder.onstop = function() {
+                        if (conversionInterval) { clearInterval(conversionInterval); conversionInterval = null; }
+                        convertedBlob = new Blob(conversionChunks, { type: 'video/webm' });
+                        progressBar.style.width = '100%';
+                        progressText.textContent = '转换完成！文件: ' + (convertedBlob.size / (1024*1024)).toFixed(2) + ' MB';
+                        setTimeout(function() {
+                            progressContainer.classList.add('hidden');
+                            resultContainer.classList.remove('hidden');
+                        }, 800);
+                        log('MP4转换完成, ' + (convertedBlob.size / (1024*1024)).toFixed(2) + ' MB', 'success');
+                    };
+                    conversionRecorder.start(1000);
+                    progressBar.style.width = '15%';
+                    progressText.textContent = '正在录制...';
+                    log('开始录制转换...', 'success');
+                    var startTime = Date.now();
+                    conversionInterval = setInterval(function() {
+                        var elapsed = Date.now() - startTime;
+                        if (duration > 0) {
+                            var pct = Math.min(15 + (elapsed / duration) * 80, 95);
+                            progressBar.style.width = pct + '%';
+                            progressText.textContent = '录制中... ' + (elapsed/1000).toFixed(0) + '秒 / ' + (duration/1000) + '秒';
+                            if (elapsed >= duration) {
+                                clearInterval(conversionInterval); conversionInterval = null;
+                                if (conversionRecorder.state !== 'inactive') conversionRecorder.stop();
+                            }
+                        } else {
+                            progressBar.style.width = Math.min(15 + (elapsed / 300000) * 80, 95) + '%';
+                            progressText.textContent = '录制中... ' + (elapsed/1000).toFixed(0) + '秒（切换到播放标签停止）';
+                        }
+                    }, 500);
+                } catch(e) {
+                    progressText.textContent = '录制失败: ' + e.message;
+                    log('转换录制失败: ' + e.message, 'error');
+                }
             }
-            
-            const url = URL.createObjectURL(convertedBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'converted-from-m3u8-' + Date.now() + '.webm';
+
+            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                hls = new Hls({
+                    xhrSetup: function(xhr, reqUrl) {
+                        var ref = document.getElementById('referer').value.trim();
+                        var ua = document.getElementById('user-agent').value.trim();
+                        if (ref) xhr.setRequestHeader('Referer', ref);
+                        if (ua) xhr.setRequestHeader('User-Agent', ua);
+                    }
+                });
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    progressBar.style.width = '10%';
+                    progressText.textContent = '流已加载，准备录制...';
+                    video.play().then(function() { setTimeout(beginRec, 1500); }).catch(function(e) {
+                        progressText.textContent = '播放失败: ' + e.message;
+                    });
+                });
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) { progressText.textContent = '加载失败: ' + data.details; log('转换加载失败: ' + data.details, 'error'); }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.addEventListener('loadedmetadata', function() {
+                    progressBar.style.width = '10%';
+                    progressText.textContent = '流已加载...';
+                    video.play().then(function() { setTimeout(beginRec, 1500); });
+                }, { once: true });
+            } else {
+                progressText.textContent = '浏览器不支持HLS';
+                log('浏览器不支持HLS', 'error');
+            }
+        }
+
+        function downloadConvertedFile() {
+            if (!convertedBlob) { alert('没有可下载的文件。请先完成一次转换。'); return; }
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(convertedBlob);
+            a.download = 'converted-m3u8-' + Date.now() + '.webm';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            log('MP4 (WebM) 文件已下载', 'success');
+            URL.revokeObjectURL(a.href);
+            log('转换文件已下载', 'success');
         }
         
         // Keyboard shortcuts
@@ -607,7 +652,7 @@
             log('欢迎使用增强版M3U8播放器！所有功能均为纯浏览器JS实现 (hls.js + MediaRecorder)。', 'success');
             
             // Auto dark mode based on preference
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 darkMode = true;
                 document.documentElement.classList.add('dark');
                 document.getElementById('theme-icon').textContent = '☀️';
@@ -625,7 +670,10 @@
             }, 1200);
             
             // Make tabs responsive
-            console.log('%cM3U8 Player v2.1 - 功能已完全修复', 'color:#3b82f6; font-size:13px; font-family:monospace');
+            document.getElementById('convert-url').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') startConversion();
+            });
+            console.log('%cM3U8 Player v2.1 - 功能已修复', 'color:#3b82f6; font-size:13px; font-family:monospace');
         };
     </script>
 </body>
