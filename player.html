@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M3U8在线播放器 - 免费播放HLS流媒体视频</title>
+  <meta name="description" content="免费在线播放M3U8/HLS视频流，支持直播和点播。输入M3U8链接即可播放，无需安装软件，自适应码率，全平台兼容。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://m3u8player.gitlcp.com/player.html">
+  <link rel="icon" type="image/png" href="/images/ic-play.png">
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="M3U8在线播放器 - 免费播放HLS流媒体视频">
+  <meta property="og:description" content="输入M3U8链接即可在线播放，支持直播和点播，无需安装软件。">
+  <meta property="og:image" content="https://m3u8player.gitlcp.com/images/ic-play.png">
+  <meta property="og:url" content="https://m3u8player.gitlcp.com/player.html">
+  <meta property="og:type" "website">
+  <meta property="og:site_name" content="M3U8在线播放器">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="M3U8在线播放器">
+  <meta name="twitter:description" content="输入M3U8链接即可在线播放HLS视频流。">
+  <meta name="twitter:image" content="https://m3u8player.gitlcp.com/images/ic-play.png">
+  
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "M3U8在线播放器",
+    "description": "免费在线播放M3U8/HLS视频流",
+    "url": "https://m3u8player.gitlcp.com/player.html",
+    "applicationCategory": "VideoApplication",
+    "operatingSystem": "Any"
+  }
+  </script>
+  
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1653188471819736" crossorigin="anonymous"></script>
+  
+  <!-- hls.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
+  
+  <style>
+    :root { 
+      --primary: #667eea; 
+      --primary-dark: #5a67d8; 
+      --text: #2d3748; 
+      --bg: #f7fafc; 
+      --white: #fff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      line-height: 1.6; 
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    
+    /* Header */
+    header { 
+      background: var(--white); 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+      position: sticky; 
+      top: 0; 
+      z-index: 100; 
+    }
+    nav { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      height: 64px; 
+    }
+    .logo { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      text-decoration: none; 
+      color: var(--text); 
+      font-weight: 700; 
+      font-size: 20px; 
+    }
+    .logo img { width: 32px; height: 32px; }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { 
+      text-decoration: none; 
+      color: var(--text); 
+      font-weight: 500; 
+    }
+    .nav-links a:hover { color: var(--primary); }
+    
+    /* Main */
+    main { padding: 40px 0; }
+    h1 { 
+      font-size: 28px; 
+      text-align: center; 
+      margin-bottom: 24px; 
+      color: var(--text); 
+    }
+    
+    /* Player Container */
+    .player-wrapper { 
+      background: var(--white); 
+      border-radius: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+      overflow: hidden; 
+      margin-bottom: 24px; 
+    }
+    .video-container { 
+      position: relative; 
+      padding-bottom: 56.25%; 
+      background: #000; 
+    }
+    video { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      object-fit: contain; 
+    }
+    
+    /* Controls */
+    .controls { 
+      padding: 20px; 
+      border-top: 1px solid #e2e8f0; 
+    }
+    .input-group { 
+      display: flex; 
+      gap: 12px; 
+      margin-bottom: 16px; 
+    }
+    .input-group input { 
+      flex: 1; 
+      padding: 12px 16px; 
+      border: 2px solid #e2e8f0; 
+      border-radius: 8px; 
+      font-size: 16px; 
+      transition: border-color 0.2s; 
+    }
+    .input-group input:focus { 
+      outline: none; 
+      border-color: var(--primary); 
+    }
+    .btn { 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 8px; 
+      font-size: 16px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .btn-primary { 
+      background: var(--primary); 
+      color: var(--white); 
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { 
+      background: #e2e8f0; 
+      color: var(--text); 
+    }
+    .btn-secondary:hover { background: #cbd5e0; }
+    
+    /* Options */
+    .options { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 12px; 
+    }
+    .option { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 4px; 
+    }
+    .option label { 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: #718096; 
+    }
+    .option input, .option select { 
+      padding: 8px 12px; 
+      border: 1px solid #e2e8f0; 
+      border-radius: 6px; 
+    }
+    
+    /* Status */
+    .status { 
+      padding: 12px 16px; 
+      border-radius: 8px; 
+      margin-top: 12px; 
+      font-size: 14px; 
+      display: none; 
+    }
+    .status.info { 
+      background: #ebf8ff; 
+      color: #3182ce; 
+      display: block; 
+    }
+    .status.error { 
+      background: #fed7d7; 
+      color: #c53030; 
+      display: block; 
+    }
+    .status.success { 
+      background: #c6f6d5; 
+      color: #276749; 
+      display: block; 
+    }
+    
+    /* Embed Code */
+    .embed-section { 
+      background: var(--white); 
+      padding: 24px; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+      margin-top: 24px; 
+    }
+    .embed-section h2 { 
+      font-size: 20px; 
+      margin-bottom: 16px; 
+    }
+    .embed-code { 
+      background: #2d3748; 
+      color: #fff; 
+      padding: 16px; 
+      border-radius: 8px; 
+      font-family: monospace; 
+      font-size: 14px; 
+      overflow-x: auto; 
+      white-space: pre-wrap; 
+      word-break: break-all; 
+    }
+    
+    /* Info */
+    .info-section { 
+      margin-top: 40px; 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+      gap: 24px; 
+    }
+    .info-card { 
+      background: var(--white); 
+      padding: 24px; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+    }
+    .info-card h3 { 
+      font-size: 18px; 
+      margin-bottom: 12px; 
+      color: var(--text); 
+    }
+    .info-card p { 
+      color: #718096; 
+      font-size: 14px; 
+    }
+    
+    /* Ad */
+    .ad-container { 
+      text-align: center; 
+      padding: 20px 0; 
+      min-height: 90px; 
+    }
+    
+    /* Footer */
+    footer { 
+      background: #2d3748; 
+      color: var(--white); 
+      padding: 40px 0 20px; 
+      margin-top: 60px; 
+    }
+    .footer-content { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 32px; 
+      margin-bottom: 32px; 
+    }
+    .footer-section h3 { font-size: 16px; margin-bottom: 16px; }
+    .footer-section ul { list-style: none; }
+    .footer-section li { margin-bottom: 8px; }
+    .footer-section a { 
+      color: #a0aec0; 
+      text-decoration: none; 
+    }
+    .footer-section a:hover { color: var(--white); }
+    .footer-bottom { 
+      border-top: 1px solid #4a5568; 
+      padding-top: 20px; 
+      text-align: center; 
+      color: #a0aec0; 
+      font-size: 14px; 
+    }
+    
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      h1 { font-size: 22px; }
+      .input-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">
+        <img src="/images/ic-play.png" alt="M3U8播放器">
+        <span>M3U8播放器</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/">首页</a></li>
+        <li><a href="/player.html">在线播放</a></li>
+        <li><a href="/m3u8_to_mp4/">转MP4</a></li>
+        <li><a href="/about.html">关于</a></li>
+        <li><a href="/contact.html">联系</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <div class="container">
+      <h1>M3U8在线播放器</h1>
+      
+      <div class="player-wrapper">
+        <div class="video-container">
+          <video id="video" controls playsinline poster="/images/ic-play.png"></video>
+        </div>
+        <div class="controls">
+          <div class="input-group">
+            <input type="text" id="urlInput" placeholder="请输入M3U8视频链接..." value="">
+            <button class="btn btn-primary" onclick="playVideo()">播放</button>
+            <button class="btn btn-secondary" onclick="clearPlayer()">清空</button>
+          </div>
+          <div class="options">
+            <div class="option">
+              <label for="referer">Referer（可选）</label>
+              <input type="text" id="referer" placeholder="https://example.com">
+            </div>
+            <div class="option">
+              <label for="userAgent">User-Agent（可选）</label>
+              <input type="text" id="userAgent" placeholder="Mozilla/5.0...">
+            </div>
+          </div>
+          <div id="status" class="status"></div>
+        </div>
+      </div>
+      
+      <!-- Ad -->
+      <div class="ad-container">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-1653188471819736"
+             data-ad-slot="1234567891"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+      
+      <div class="embed-section">
+        <h2>嵌入代码</h2>
+        <div class="embed-code" id="embedCode">&lt;iframe src="https://m3u8player.gitlcp.com/player.html" width="100%" height="400" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</div>
+      </div>
+      
+      <section class="info-section">
+        <article class="info-card">
+          <h3>如何使用</h3>
+          <p>1. 复制M3U8视频链接<br>2. 粘贴到上方输入框<br>3. 点击播放按钮即可观看</p>
+        </article>
+        <article class="info-card">
+          <h3>支持格式</h3>
+          <p>支持标准HLS协议（M3U8）、TS片段、FMP4格式。兼容直播流和点播视频。</p>
+        </article>
+        <article class="info-card">
+          <h3>常见问题</h3>
+          <p>部分视频需要特定的Referer或User-Agent才能播放，可在高级选项中设置。</p>
+        </article>
+      </section>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>工具</h3>
+          <ul>
+            <li><a href="/player.html">M3U8播放器</a></li>
+            <li><a href="/m3u8_to_mp4/">M3U8转MP4</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>文章</h3>
+          <ul>
+            <li><a href="/post/1001.html">什么是m3u8协议</a></li>
+            <li><a href="/post/1002.html">播放M3U8视频</a></li>
+            <li><a href="/post/1003.html">M3U8与MP4区别</a></li>
+            <li><a href="/post/1004.html">HLS流媒体技术</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>关于</h3>
+          <ul>
+            <li><a href="/about.html">关于我们</a></li>
+            <li><a href="/privacy.html">隐私政策</a></li>
+            <li><a href="/contact.html">联系我们</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2019-2025 M3U8在线播放器 | 联系邮箱: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="56646f6464666461656f651627277835393b">[email&#160;protected]</a></p>
+      </div>
+    </div>
+  </footer>
+  
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    const video = document.getElementById('video');
+    const urlInput = document.getElementById('urlInput');
+    const status = document.getElementById('status');
+    let hls = null;
+    
+    // Get URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlParam = urlParams.get('url');
+    if (urlParam) {
+      urlInput.value = decodeURIComponent(urlParam);
+      playVideo();
+    }
+    
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = 'status ' + type;
+    }
+    
+    function playVideo() {
+      const url = urlInput.value.trim();
+      if (!url) {
+        showStatus('请输入M3U8视频链接', 'error');
+        return;
+      }
+      
+      showStatus('正在加载视频...', 'info');
+      
+      // Destroy previous instance
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          debug: false,
+          enableWorker: true
+        });
+        
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          showStatus('视频加载成功，开始播放', 'success');
+          video.play();
+        });
+        
+        hls.on(Hls.Events.ERROR, function(event, data) {
+          if (data.fatal) {
+            showStatus('视频加载失败: ' + data.type, 'error');
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.addEventListener('loadedmetadata', function() {
+          showStatus('视频加载成功', 'success');
+          video.play();
+        });
+      } else {
+        showStatus('您的浏览器不支持HLS播放', 'error');
+      }
+    }
+    
+    function clearPlayer() {
+      urlInput.value = '';
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      video.src = '';
+      status.className = 'status';
+      status.textContent = '';
+    }
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ef521d48c38b359',t:'MTc3NjY5ODQxNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
