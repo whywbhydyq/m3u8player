@@ -6,14 +6,18 @@
   <title>M3U8转MP4 - 免费在线视频格式转换工具</title>
   <meta name="description" content="免费将M3U8视频流转换为MP4格式。在线转换，无需安装软件，支持下载M3U8视频为MP4文件，保留原始画质，简单快捷。">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://m3u8player.gitlcp.com/m3u8_to_mp4/">
+  
+    <meta name="google-adsense-account" content="ca-pub-1653188471819736">
+<link rel="canonical" href="https://m3u8player.gitlcp.com/m3u8_to_mp4/">
   <link rel="icon" type="image/png" href="/images/ic-play.png">
   
   <!-- Preconnect -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7"></script>
-  
-  <!-- Open Graph -->
+  <script src="https://cdn.jsdelivr.net/npm/mux.js/dist/mux.min.js"></script>
+  <script src="/assets/m3u8-mp4-converter.js"></script>
+
+<!-- Open Graph -->
   <meta property="og:title" content="M3U8转MP4 - 免费在线视频格式转换工具">
   <meta property="og:description" content="免费将M3U8视频流转换为MP4格式，在线转换，无需安装软件。">
   <meta property="og:image" content="https://m3u8player.gitlcp.com/images/ic-play.png">
@@ -382,7 +386,7 @@
         <div class="options">
           <div class="option">
             <label for="filename">文件名（可选）</label>
-            <input type="text" id="filename" placeholder="video.mp4">
+            <input type="text" id="filename" placeholder="video.mp4" value="video.mp4">
           </div>
           <div class="option">
             <label for="quality">画质选择</label>
@@ -430,7 +434,7 @@
         <article class="feature">
           <div class="feature-icon">⚡</div>
           <h3>快速转换</h3>
-          <p>利用现代浏览器性能，转换速度快</p>
+          <p>直接合并或转封装M3U8分片，输出真实MP4文件</p>
         </article>
         <article class="feature">
           <div class="feature-icon">🎥</div>
@@ -455,7 +459,7 @@
           <li class="step">
             <div class="step-number">3</div>
             <h4>开始转换</h4>
-            <p>点击开始转换按钮</p>
+            <p>点击开始转换按钮，浏览器会读取并处理视频分片</p>
           </li>
           <li class="step">
             <div class="step-number">4</div>
@@ -491,21 +495,21 @@
           <ul>
             <li><a href="/about.html">关于我们</a></li>
             <li><a href="/privacy.html">隐私政策</a></li>
+            <li><a href="/terms.html">服务条款</a></li>
+            <li><a href="/disclaimer.html">免责声明</a></li>
             <li><a href="/contact.html">联系我们</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2019-2025 M3U8在线播放器 | 联系邮箱: <a href="mailto:2922027393@qq.com">2922027393@qq.com</a></p>
+        <p>&copy; 2019-2026 M3U8在线播放器 | 联系邮箱: <a href="mailto:2922027393@qq.com">2922027393@qq.com</a></p>
       </div>
     </div>
   </footer>
   
   <script>
-    var convHls = null;
-    var convRecorder = null;
-    var convChunks = [];
-    var convInterval = null;
+    var convertedBlob = null;
+    var convertedFilename = null;
 
     function showStatus(message, type) {
       var status = document.getElementById('status');
@@ -522,109 +526,45 @@
       textEl.textContent = text;
     }
 
-    function startConversion() {
+    async function startConversion() {
       var url = document.getElementById('urlInput').value.trim();
       var btn = document.getElementById('convertBtn');
+      var filename = document.getElementById('filename').value.trim();
+      var quality = document.getElementById('quality').value;
       if (!url) { showStatus('请输入M3U8视频链接', 'error'); return; }
 
       btn.disabled = true;
-      showStatus('正在初始化...', 'info');
-      updateProgress(5, '正在加载视频流...');
+      btn.textContent = '转换中...';
+      convertedBlob = null;
+      convertedFilename = null;
+      showStatus('正在读取M3U8清单...', 'info');
+      updateProgress(2, '正在读取M3U8清单...');
 
-      if (convInterval) { clearInterval(convInterval); convInterval = null; }
-      if (convRecorder && convRecorder.state !== 'inactive') { convRecorder.stop(); }
-      if (convHls) { convHls.destroy(); convHls = null; }
-      convChunks = [];
-
-      var video = document.getElementById('hiddenVideo');
-      var started = false;
-
-      function beginRec() {
-        if (started) return;
-        started = true;
-        try {
-          var mime = 'video/webm;codecs=vp9';
-          if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
-          if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
-          if (!MediaRecorder.isTypeSupported(mime)) mime = '';
-          var stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
-          if (!stream) { showStatus('浏览器不支持流捕获', 'error'); btn.disabled = false; return; }
-          convRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
-          convRecorder.ondataavailable = function(e) { if (e.data.size > 0) convChunks.push(e.data); };
-          convRecorder.onstop = function() {
-            if (convInterval) { clearInterval(convInterval); convInterval = null; }
-            var blob = new Blob(convChunks, { type: 'video/webm' });
-            updateProgress(100, '转换完成！');
-            showStatus('转换完成！文件大小: ' + (blob.size / (1024*1024)).toFixed(2) + ' MB', 'success');
-            var fname = document.getElementById('filename').value.trim() || ('converted-' + Date.now() + '.webm');
-            var a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = fname;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-            btn.disabled = false;
-          };
-          convRecorder.start(1000);
-          updateProgress(15, '正在录制视频...');
-          showStatus('正在录制，请等待后点击“停止并下载”', 'info');
-          btn.textContent = '停止并下载';
-          btn.disabled = false;
-          btn.onclick = function() { stopConversion(); };
-          var startTime = Date.now();
-          convInterval = setInterval(function() {
-            var elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-            var pct = Math.min(15 + (elapsed / 300) * 80, 95);
-            updateProgress(pct, '录制中... ' + elapsed + '秒');
-          }, 500);
-        } catch(e) {
-          showStatus('录制失败: ' + e.message, 'error');
-          btn.disabled = false;
-        }
-      }
-
-      if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-        convHls = new Hls();
-        convHls.loadSource(url);
-        convHls.attachMedia(video);
-        convHls.on(Hls.Events.MANIFEST_PARSED, function() {
-          updateProgress(10, '流已加载，准备录制...');
-          video.play().then(function() { setTimeout(beginRec, 1500); }).catch(function(e) {
-            showStatus('播放失败: ' + e.message, 'error');
-            btn.disabled = false;
-          });
-        });
-        convHls.on(Hls.Events.ERROR, function(event, data) {
-          if (data.fatal) {
-            showStatus('加载失败: ' + data.details, 'error');
-            btn.disabled = false;
+      try {
+        var result = await M3U8Mp4Converter.convert(url, {
+          quality: quality,
+          filename: filename || ('converted-' + Date.now() + '.mp4'),
+          onProgress: function(percent, message) {
+            updateProgress(percent, message);
           }
         });
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-        video.addEventListener('loadedmetadata', function() {
-          updateProgress(10, '流已加载...');
-          video.play().then(function() { setTimeout(beginRec, 1500); });
-        }, { once: true });
-      } else {
-        showStatus('浏览器不支持HLS播放', 'error');
+        convertedBlob = result.blob;
+        convertedFilename = result.filename;
+        updateProgress(100, '转换完成！');
+        showStatus('转换完成！模式: ' + result.mode + '，分片: ' + result.segments + '，文件大小: ' + (result.blob.size / (1024 * 1024)).toFixed(2) + ' MB', 'success');
+        M3U8Mp4Converter.downloadBlob(result.blob, result.filename);
+      } catch (error) {
+        updateProgress(100, '转换失败');
+        showStatus('转换失败：' + error.message, 'error');
+      } finally {
         btn.disabled = false;
+        btn.textContent = '开始转换';
       }
-    }
-
-    function stopConversion() {
-      if (convRecorder && convRecorder.state !== 'inactive') { convRecorder.stop(); }
-      if (convInterval) { clearInterval(convInterval); convInterval = null; }
-      var btn = document.getElementById('convertBtn');
-      btn.textContent = '开始转换';
-      btn.onclick = function() { startConversion(); };
-      showStatus('正在生成文件...', 'info');
     }
 
     document.getElementById('urlInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') startConversion();
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ef51cad0a7caf25',t:'MTc3NjY5ODIwNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

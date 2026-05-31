@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="免费在线M3U8播放器，支持HLS流媒体即时播放和浏览器端MP4转换。无需安装软件，输入链接即可播放直播或点播视频，支持自定义Referer和User-Agent。一键将M3U8转换为MP4下载。">
+    <meta name="description" content="免费在线M3U8播放器，支持HLS流媒体即时播放和浏览器端MP4转换。无需安装软件，输入链接即可播放直播或点播视频，一键将可访问的M3U8转换为MP4下载。">
     <meta name="robots" content="index, follow">
-    <meta name="keywords" content="m3u8播放器, hls播放器, m3u8转mp4, 在线视频播放, hls.js, 免费m3u8工具">
-    <title>M3U8在线播放器 - HLS视频播放与MP4转换工具</title>
+
+    <meta name="google-adsense-account" content="ca-pub-1653188471819736">
+<title>M3U8在线播放器 - HLS视频播放与MP4转换工具</title>
     <link rel="canonical" href="https://m3u8player.gitlcp.com/player.html">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7"></script>
-    <style>
+        <script src="https://cdn.jsdelivr.net/npm/mux.js/dist/mux.min.js"></script>
+    <script src="/assets/m3u8-mp4-converter.js"></script>
+<style>
         .video-container {
             position: relative;
             padding-top: 56.25%;
@@ -51,6 +54,8 @@
       "featureList": "HLS播放, MP4转换, 自定义Headers, 跨平台"
     }
     </script>
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1653188471819736" crossorigin="anonymous"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
     <!-- Navigation -->
@@ -63,7 +68,7 @@
                     <span class="text-blue-600 font-semibold">Player</span>
                 </div>
             </div>
-            <div class="flex items-center gap-8 text-sm font-medium">
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium">
                 <a href="https://m3u8player.gitlcp.com/" class="hover:text-blue-600 transition-colors">首页</a>
                 <a href="https://m3u8player.gitlcp.com/player.html" class="text-blue-600 font-semibold">播放器</a>
                 <a href="https://m3u8player.gitlcp.com/post/1001.html" class="hover:text-blue-600 transition-colors">文章</a>
@@ -82,7 +87,7 @@
     <main class="max-w-6xl mx-auto px-6 py-8">
         <div class="mb-10">
             <h1 class="text-4xl font-bold text-center mb-3">M3U8 在线播放器 &amp; MP4转换工具</h1>
-            <p class="text-center text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">纯浏览器实现 · 无需安装 · 支持自定义请求头 · HLS直播/点播播放 · MediaRecorder MP4录制转换</p>
+            <p class="text-center text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">纯浏览器实现 · 无需安装 · HLS直播/点播播放 · 浏览器端真实 MP4 转封装转换</p>
         </div>
 
         <!-- Tabs -->
@@ -109,19 +114,9 @@
                                    placeholder="输入M3U8链接 (例如: https://example.com/playlist.m3u8)" value="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8">
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Referer (可选)</label>
-                                <input id="referer" type="text" 
-                                       class="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:border-blue-500 text-sm"
-                                       placeholder="https://example.com" value="">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">User-Agent (可选)</label>
-                                <input id="user-agent" type="text" 
-                                       class="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:border-blue-500 text-sm"
-                                       placeholder="Mozilla/5.0 ..." value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36">
-                            </div>
+                        <div class="mb-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-5 py-4 text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                            <strong class="block mb-1">播放限制提示</strong>
+                            浏览器页面不能伪造 Referer 或 User-Agent 等受限请求头。请使用允许跨域访问的 M3U8 源；需要防盗链请求头的源，应通过合法授权的服务端代理处理。
                         </div>
 
                         <div class="flex gap-3">
@@ -162,20 +157,20 @@
                                     <option value="2">2.0x</option>
                                 </select>
                             </div>
-                            <button onclick="toggleRecording()" id="record-btn"
-                                    class="w-full py-3 text-sm font-medium border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 rounded-2xl hover:bg-red-50 dark:hover:bg-red-950 transition-colors">
-                                ⏺️ 开始录制为MP4
+                            <button onclick="convertCurrentStreamToMp4()" id="record-btn"
+                                    class="w-full py-3 text-sm font-medium border border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors">
+                                ⬇️ 下载当前流为MP4
                             </button>
-                            <div id="recording-status" class="text-xs text-red-500 hidden">正在录制... (录制播放的内容)</div>
+                            <div id="recording-status" class="text-xs text-blue-500 hidden">正在转换当前M3U8流...</div>
                         </div>
                     </div>
 
                     <div class="text-xs text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-amber-950/30 p-5 rounded-3xl">
                         <strong class="text-amber-600 block mb-2">提示：</strong>
                         <ul class="space-y-2">
-                            <li>• 部分受保护的流可能需要正确的Referer头</li>
-                            <li>• 转MP4功能使用浏览器MediaRecorder API录制播放内容</li>
-                            <li>• 对于长视频，建议边播放边录制</li>
+                            <li>• 部分受保护或未开放CORS的流无法直接在浏览器页面播放</li>
+                            <li>• 转MP4功能直接读取M3U8分片并在浏览器内转封装为MP4</li>
+                            <li>• 支持常见 MPEG-TS 与 fMP4 HLS 点播流，直播流建议先使用片段下载</li>
                             <li>• 所有处理均在您的浏览器本地完成，保护隐私</li>
                         </ul>
                     </div>
@@ -184,7 +179,7 @@
 
             <!-- Log -->
             <div class="mt-8 bg-gray-900 text-green-400 p-5 rounded-3xl font-mono text-xs log" id="log">
-                [系统] M3U8播放器已就绪。支持HLS.js v1.5.7 + MediaRecorder MP4转换<br>
+                [系统] M3U8播放器已就绪。支持HLS.js v1.5.7 + 浏览器端MP4转封装<br>
                 [提示] 点击示例链接快速测试
             </div>
         </div>
@@ -212,13 +207,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">录制时长</label>
-                            <select id="duration" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                                <option value="60">60秒</option>
-                                <option value="180" selected>3分钟</option>
-                                <option value="300">5分钟</option>
-                                <option value="0">直到手动停止</option>
-                            </select>
+                            <label class="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">输出文件名</label>
+                            <input id="convert-filename" type="text" placeholder="video.mp4" class="w-full px-6 py-5 border border-gray-300 dark:border-gray-700 rounded-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                         </div>
                     </div>
                     
@@ -231,7 +221,7 @@
                         <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                             <div id="progress-bar" class="h-2 bg-blue-500 w-0 transition-all duration-300"></div>
                         </div>
-                        <p id="progress-text" class="text-center text-sm mt-3 text-gray-500">正在加载流并准备录制...</p>
+                        <p id="progress-text" class="text-center text-sm mt-3 text-gray-500">正在读取M3U8清单...</p>
                     </div>
                     
                     <div id="conversion-result" class="hidden p-6 bg-green-50 dark:bg-green-950 rounded-3xl text-center">
@@ -246,8 +236,8 @@
             </div>
             
             <div class="text-center mt-10 text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                注意：MP4转换使用浏览器内置MediaRecorder API录制播放的视频内容。<br>
-                这是一种纯前端、无服务器的实现。适合点播视频完整录制或直播片段捕捉。
+                注意：MP4转换会直接下载并合并M3U8分片，在浏览器端输出 video/mp4 文件。<br>
+                受CORS、加密分片和字节范围分片限制的源站可能无法转换。
             </div>
         </div>
     </main>
@@ -267,7 +257,7 @@
                     <div class="font-medium mb-4 text-gray-900 dark:text-white">产品</div>
                     <div class="space-y-2.5 text-gray-500 dark:text-gray-400 text-xs">
                         <a href="https://m3u8player.gitlcp.com/player.html" class="block hover:text-blue-600">在线播放器</a>
-                        <a href="https://m3u8player.gitlcp.com/m3u8_to_mp4/index.html" class="block hover:text-blue-600">M3U8转MP4</a>
+                        <a href="https://m3u8player.gitlcp.com/m3u8_to_mp4/" class="block hover:text-blue-600">M3U8转MP4</a>
                     </div>
                 </div>
                 <div>
@@ -284,6 +274,8 @@
                     <div class="space-y-2.5 text-gray-500 dark:text-gray-400 text-xs">
                         <a href="https://m3u8player.gitlcp.com/about.html" class="block hover:text-blue-600">关于本站</a>
                         <a href="https://m3u8player.gitlcp.com/privacy.html" class="block hover:text-blue-600">隐私政策</a>
+                        <a href="https://m3u8player.gitlcp.com/terms.html" class="block hover:text-blue-600">服务条款</a>
+                        <a href="https://m3u8player.gitlcp.com/disclaimer.html" class="block hover:text-blue-600">免责声明</a>
                         <a href="https://m3u8player.gitlcp.com/contact.html" class="block hover:text-blue-600">联系我们</a>
                         <a href="https://github.com/whywbhydyq/m3u8player" target="_blank" class="block hover:text-blue-600">GitHub</a>
                     </div>
@@ -291,7 +283,7 @@
             </div>
             
             <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-500">
-                © 2025 M3U8Player. All Rights Reserved. | 
+                © 2026 M3U8Player. All Rights Reserved. | 
                 本工具仅供合法视频流使用 | 
                 AdSense ID: pub-1653188471819736
                 <div class="mt-2">本页面符合Google AdSense政策要求，已优化SEO并确保零死链。</div>
@@ -301,11 +293,7 @@
 
     <script>
         let hls = null;
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let isRecording = false;
-        let recordedBlob = null;
-        let currentTab = 0;
+                let currentTab = 0;
         let darkMode = false;
         let isLoading = false;
 
@@ -358,9 +346,6 @@
             }
             
             const video = document.getElementById('video');
-            const referer = document.getElementById('referer').value.trim();
-            const userAgent = document.getElementById('user-agent').value.trim();
-            
             document.getElementById('player-status').classList.remove('hidden');
             
             if (hls) {
@@ -375,14 +360,9 @@
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 hls = new Hls({
                     debug: false,
-                    xhrSetup: function(xhr, url) {
-                        if (referer) {
-                            xhr.setRequestHeader('Referer', referer);
-                        }
-                        if (userAgent) {
-                            xhr.setRequestHeader('User-Agent', userAgent);
-                        }
-                    }
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
                 });
                 
                 hls.loadSource(urlInput);
@@ -440,60 +420,35 @@
             log('播放速度设置为 ' + rate + 'x');
         }
 
-        let recorderTimer = null;
-        function toggleRecording() {
+        async function convertCurrentStreamToMp4() {
+            const sourceUrl = document.getElementById('m3u8-url').value.trim();
             const btn = document.getElementById('record-btn');
             const status = document.getElementById('recording-status');
-            const video = document.getElementById('video');
-            
-            if (!isRecording) {
-                if (!video.src && !hls) {
-                    alert('请先加载并播放一个视频流');
-                    return;
-                }
-                
-                recordedChunks = [];
-                let mimeType = 'video/webm;codecs=vp9';
-                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
-                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
-                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
-                mediaRecorder = new MediaRecorder(video.captureStream(), mimeType ? { mimeType: mimeType } : {});
-                
-                mediaRecorder.ondataavailable = function(event) {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
+            if (!sourceUrl) {
+                alert('请先输入或加载一个M3U8地址');
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = '正在转换...';
+            status.classList.remove('hidden');
+            try {
+                const result = await M3U8Mp4Converter.convert(sourceUrl, {
+                    quality: 'medium',
+                    filename: 'current-m3u8-' + Date.now() + '.mp4',
+                    onProgress: function(percent, message) {
+                        status.textContent = message + ' (' + percent + '%)';
                     }
-                };
-                
-                mediaRecorder.onstop = function() {
-                    recordedBlob = new Blob(recordedChunks, { type: 'video/webm' });
-                    isRecording = false;
-                    btn.textContent = '⏺️ 开始录制为MP4';
-                    status.classList.add('hidden');
-                    log('录制完成。文件大小: ' + (recordedBlob.size / (1024*1024)).toFixed(2) + ' MB', 'success');
-                    // Auto trigger download for convenience
-                    const url = URL.createObjectURL(recordedBlob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'recorded-video-' + Date.now() + '.webm';
-                    document.body.appendChild(a);
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                };
-                
-                mediaRecorder.start(1000); // timeslice 1s
-                isRecording = true;
-                btn.innerHTML = '⏹️ 停止录制';
-                status.classList.remove('hidden');
-                log('开始录制视频流 (使用MediaRecorder)...');
-                
-                if (recorderTimer) clearTimeout(recorderTimer);
-                
-            } else {
-                mediaRecorder.stop();
-                if (recorderTimer) clearTimeout(recorderTimer);
+                });
+                M3U8Mp4Converter.downloadBlob(result.blob, result.filename);
+                log('当前M3U8已转换为MP4。模式: ' + result.mode + '，分片: ' + result.segments + '，大小: ' + (result.blob.size / (1024 * 1024)).toFixed(2) + ' MB', 'success');
+            } catch (error) {
+                log('MP4转换失败: ' + error.message, 'error');
+                alert('MP4转换失败：' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⬇️ 下载当前流为MP4';
+                status.classList.add('hidden');
+                status.textContent = '正在转换当前M3U8流...';
             }
         }
 
@@ -503,10 +458,7 @@
                 "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
                 "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
             ];
-            const referers = ["", "", ""];
-            
             document.getElementById('m3u8-url').value = urls[n];
-            document.getElementById('referer').value = referers[n];
             switchTab(0);
             setTimeout(() => {
                 loadAndPlay();
@@ -515,11 +467,9 @@
 
         // Converter functions
         let convertedBlob = null;
-        let conversionRecorder = null;
-        let conversionChunks = [];
-        let conversionInterval = null;
+        let convertedFilename = null;
 
-        function startConversion() {
+        async function startConversion() {
             const url = document.getElementById('convert-url').value.trim();
             if (!url) { alert('请输入M3U8地址'); return; }
 
@@ -527,117 +477,43 @@
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const resultContainer = document.getElementById('conversion-result');
-            const duration = parseInt(document.getElementById('duration').value) * 1000;
+            const quality = document.getElementById('quality').value;
+            const filename = document.getElementById('convert-filename').value.trim();
 
             progressContainer.classList.remove('hidden');
             resultContainer.classList.add('hidden');
-            progressBar.style.width = '5%';
-            progressText.textContent = '正在加载视频流...';
+            progressBar.style.width = '2%';
+            progressText.textContent = '正在读取M3U8清单...';
+            convertedBlob = null;
+            convertedFilename = null;
 
-            if (conversionInterval) { clearInterval(conversionInterval); conversionInterval = null; }
-            if (conversionRecorder && conversionRecorder.state !== 'inactive') { conversionRecorder.stop(); }
-            conversionChunks = [];
-
-            switchTab(0);
-            document.getElementById('m3u8-url').value = url;
-            if (hls) { hls.destroy(); hls = null; }
-
-            const video = document.getElementById('video');
-            let started = false;
-
-            function beginRec() {
-                if (started) return;
-                started = true;
-                try {
-                    let mime = 'video/webm;codecs=vp9';
-                    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
-                    if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
-                    if (!MediaRecorder.isTypeSupported(mime)) mime = '';
-                    const stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
-                    if (!stream) { progressText.textContent = '浏览器不支持流捕获'; return; }
-                    conversionRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
-                    conversionRecorder.ondataavailable = function(e) { if (e.data.size > 0) conversionChunks.push(e.data); };
-                    conversionRecorder.onstop = function() {
-                        if (conversionInterval) { clearInterval(conversionInterval); conversionInterval = null; }
-                        convertedBlob = new Blob(conversionChunks, { type: 'video/webm' });
-                        progressBar.style.width = '100%';
-                        progressText.textContent = '转换完成！文件: ' + (convertedBlob.size / (1024*1024)).toFixed(2) + ' MB';
-                        setTimeout(function() {
-                            progressContainer.classList.add('hidden');
-                            resultContainer.classList.remove('hidden');
-                        }, 800);
-                        log('MP4转换完成, ' + (convertedBlob.size / (1024*1024)).toFixed(2) + ' MB', 'success');
-                    };
-                    conversionRecorder.start(1000);
-                    progressBar.style.width = '15%';
-                    progressText.textContent = '正在录制...';
-                    log('开始录制转换...', 'success');
-                    var startTime = Date.now();
-                    conversionInterval = setInterval(function() {
-                        var elapsed = Date.now() - startTime;
-                        if (duration > 0) {
-                            var pct = Math.min(15 + (elapsed / duration) * 80, 95);
-                            progressBar.style.width = pct + '%';
-                            progressText.textContent = '录制中... ' + (elapsed/1000).toFixed(0) + '秒 / ' + (duration/1000) + '秒';
-                            if (elapsed >= duration) {
-                                clearInterval(conversionInterval); conversionInterval = null;
-                                if (conversionRecorder.state !== 'inactive') conversionRecorder.stop();
-                            }
-                        } else {
-                            progressBar.style.width = Math.min(15 + (elapsed / 300000) * 80, 95) + '%';
-                            progressText.textContent = '录制中... ' + (elapsed/1000).toFixed(0) + '秒（切换到播放标签停止）';
-                        }
-                    }, 500);
-                } catch(e) {
-                    progressText.textContent = '录制失败: ' + e.message;
-                    log('转换录制失败: ' + e.message, 'error');
-                }
-            }
-
-            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                hls = new Hls({
-                    xhrSetup: function(xhr, reqUrl) {
-                        var ref = document.getElementById('referer').value.trim();
-                        var ua = document.getElementById('user-agent').value.trim();
-                        if (ref) xhr.setRequestHeader('Referer', ref);
-                        if (ua) xhr.setRequestHeader('User-Agent', ua);
+            try {
+                const result = await M3U8Mp4Converter.convert(url, {
+                    quality: quality,
+                    filename: filename || ('converted-m3u8-' + Date.now() + '.mp4'),
+                    onProgress: function(percent, message) {
+                        progressBar.style.width = percent + '%';
+                        progressText.textContent = message;
                     }
                 });
-                hls.loadSource(url);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    progressBar.style.width = '10%';
-                    progressText.textContent = '流已加载，准备录制...';
-                    video.play().then(function() { setTimeout(beginRec, 1500); }).catch(function(e) {
-                        progressText.textContent = '播放失败: ' + e.message;
-                    });
-                });
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) { progressText.textContent = '加载失败: ' + data.details; log('转换加载失败: ' + data.details, 'error'); }
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-                video.addEventListener('loadedmetadata', function() {
-                    progressBar.style.width = '10%';
-                    progressText.textContent = '流已加载...';
-                    video.play().then(function() { setTimeout(beginRec, 1500); });
-                }, { once: true });
-            } else {
-                progressText.textContent = '浏览器不支持HLS';
-                log('浏览器不支持HLS', 'error');
+                convertedBlob = result.blob;
+                convertedFilename = result.filename;
+                progressBar.style.width = '100%';
+                progressText.textContent = '转换完成！文件: ' + (convertedBlob.size / (1024 * 1024)).toFixed(2) + ' MB';
+                resultContainer.classList.remove('hidden');
+                log('MP4转换完成。模式: ' + result.mode + '，分片: ' + result.segments + '，大小: ' + (convertedBlob.size / (1024 * 1024)).toFixed(2) + ' MB', 'success');
+                downloadConvertedFile();
+            } catch (error) {
+                progressBar.style.width = '100%';
+                progressText.textContent = '转换失败：' + error.message;
+                log('MP4转换失败: ' + error.message, 'error');
             }
         }
 
         function downloadConvertedFile() {
             if (!convertedBlob) { alert('没有可下载的文件。请先完成一次转换。'); return; }
-            var a = document.createElement('a');
-            a.href = URL.createObjectURL(convertedBlob);
-            a.download = 'converted-m3u8-' + Date.now() + '.webm';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-            log('转换文件已下载', 'success');
+            M3U8Mp4Converter.downloadBlob(convertedBlob, convertedFilename || ('converted-m3u8-' + Date.now() + '.mp4'));
+            log('MP4文件已下载', 'success');
         }
         
         // Keyboard shortcuts
@@ -655,7 +531,7 @@
             initTailwind();
             
             // Set initial example
-            log('欢迎使用增强版M3U8播放器！所有功能均为纯浏览器JS实现 (hls.js + MediaRecorder)。', 'success');
+            log('欢迎使用增强版M3U8播放器！播放使用 hls.js，转换使用浏览器端 MP4 转封装。', 'success');
             
             // Auto dark mode based on preference
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -672,14 +548,14 @@
             
             // Add some test data to log
             setTimeout(() => {
-                log('已检查部署环境：Vercel静态托管正常 · HTTPS已启用 · SEO元数据完整');
+                log('本地功能已就绪：播放、M3U8解析、MP4转封装均在浏览器端执行');
             }, 1200);
             
             // Make tabs responsive
             document.getElementById('convert-url').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') startConversion();
             });
-            console.log('%cM3U8 Player v2.1 - 功能已修复', 'color:#3b82f6; font-size:13px; font-family:monospace');
+            console.log('%cM3U8 Player v2.2 - MP4 converter ready', 'color:#3b82f6; font-size:13px; font-family:monospace');
         };
     </script>
 </body>
